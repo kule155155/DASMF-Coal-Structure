@@ -1,65 +1,85 @@
-# Official PyTorch implementation of **ResNet-AHA**
-Intelligent Recognition of Coal Body Structure from Electrical Imaging Logs via an Alternating Hybrid Attention Mechanism
+# DASMF for Coal Body Structure Classification
+
+PyTorch implementation of DASMF for classifying coal body structures from electrical microresistivity imaging (ERMI) images.
 
 ## Overview
-This network embeds an SE module and Triplet Attention into ResNet-18 to alleviate inter-scale feature competition during multi-scale feature fusion. The model is designed to identify four types of coal body structures from grayscale electrical microresistivity imaging (ERMI) logging images.
+
+DASMF uses a ResNet-18 backbone with two components:
+
+- **Directional adaptive scale routing (DASR)** combines depth-directed and azimuth-directed feature responses at multiple scales.
+- **Multi-level feature fusion (MLF)** combines features from three backbone stages for four-class classification.
+
+The model accepts single-channel grayscale images and outputs four class logits.
 
 ### Coal structure categories
+
 `0_primary`, `1_cataclastic`, `2_granulated`, `3_mylonitic`
 
-## Environment
-Install dependencies:
+## Repository contents
+
+- `dasmf.py`: DASMF architecture and selectable loss functions.
+- `train_dasmf.py`: training and evaluation script.
+- `make_demo_dataset.py`: generator for the synthetic demonstration dataset.
+- `demo_synthetic_dataset/`: synthetic images organized into training, validation, and test folders.
+- `requirements.txt`: Python dependencies.
+
+## Installation
+
 ```bash
 pip install -r requirements.txt
 ```
-## Dataset Statement
-Due to geological data confidentiality restrictions, raw field ERMI logging data cannot be publicly released.
-The folder `demo_synthetic_dataset` contains synthetic demo images for testing and reproducing the model pipeline.
-The synthetic data cannot represent the characteristics of actual coal body structures and is only used for code verification, rather than geological quantitative analysis.
 
-The directory structure strictly matches the reading path in training code:
-```
+## Data availability
+
+The field ERMI images and associated core data are subject to geological data confidentiality restrictions and cannot be publicly released. The repository therefore provides a **synthetic demonstration dataset** for checking the code and data-loading workflow.
+
+Synthetic images do not represent real coal body structures. Results obtained from them must not be interpreted as geological findings or as a reproduction of the performance reported for the independent test well.
+
+The dataset uses the following directory structure:
+
+```text
 demo_synthetic_dataset/
-├─ train
-│  ├─ 0_primary
-│  ├─ 1_cataclastic
-│  ├─ 2_granulated
-│  └─ 3_mylonitic
-├─ val
-│  ├─ 0_primary
-│  ├─ 1_cataclastic
-│  ├─ 2_granulated
-│  └─ 3_mylonitic
-└─ test
-   ├─ 0_primary
-   ├─ 1_cataclastic
-   ├─ 2_granulated
-   └─ 3_mylonitic
+├── train/
+│   ├── 0_primary/
+│   ├── 1_cataclastic/
+│   ├── 2_granulated/
+│   └── 3_mylonitic/
+├── val/
+│   ├── 0_primary/
+│   ├── 1_cataclastic/
+│   ├── 2_granulated/
+│   └── 3_mylonitic/
+└── test/
+    ├── 0_primary/
+    ├── 1_cataclastic/
+    ├── 2_granulated/
+    └── 3_mylonitic/
 ```
-Run `python make_demo_dataset.py` to generate synthetic images before model training.
 
-## Input and Output
+The demonstration images can be generated with:
 
-### Input
-Preprocessed single-channel grayscale ERMI logging images. Images are organized into category-specific folders for training, validation and testing.
-
-### Output
-1. Optimized model checkpoint `ResNet_AHA_best.pth` saved in the `models/` folder.
-2. Quantitative metrics (Accuracy, Precision, Recall, F1-Score) and confusion matrix printed in the console.
-3. Training loss and accuracy curve image saved as `training_curves.png`.
-## Quick Start
-1. Generate synthetic demo dataset
 ```bash
 python make_demo_dataset.py
 ```
-2. Train ResNet-AHA classification model
+
+## Model and training
+
+`dasmf.py` defines `DASMFResNet18`, `DepthAzimuthScaleRouter`, and `MultiLevelClassifier`. It also provides cross-entropy, focal loss, and focal loss with a categorical-index penalty for the loss-function comparison.
+
+**Cross-entropy was used for the final DASMF architecture and model comparisons.** Defining the other losses in the code does not mean that they were used to train the final reported model.
+
+Run the demonstration training workflow with:
+
 ```bash
-python train_resnet_aha.py
+python train_dasmf.py
 ```
+
+This command uses the synthetic dataset to check that the training and evaluation pipeline runs. The reported field-data results require the confidential, core-calibrated ERMI dataset and its well-level partition; they cannot be reproduced from the synthetic images.
+
 ## Citation
-If you find this repository useful, please cite our work once published:
-```
-[Will be updated after paper acceptance]
-```
+
+If you use this code, please cite the associated paper when its bibliographic details become available.
+
 ## License
-This project is distributed under the MIT License. See the LICENSE file in this repository for full license information.
+
+This project is distributed under the MIT License. See `LICENSE`.
